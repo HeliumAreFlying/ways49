@@ -25,7 +25,7 @@ const int initGameBoard[256] = {
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-const int vlMvvLva[16] = {5,2,2,2,2,3,3,4,4,3,3,1,1,1,1,1};
+const int vlMvvLva[16] = {16,2,2,2,2,4,4,8,8,4,4,1,1,1,1,1};
 
 //const int initGameBoard[256] = {
 //        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -431,8 +431,8 @@ inline int yMirrorPos(int y) {
 }
 
 const int MAX_MOVE_NUM = 1024;
-const int MIN_VALUE = -32767;
-const int MAX_VALUE = 32767;
+const int MIN_VALUE = -65536;
+const int MAX_VALUE = 65536;
 const int MIN_WIN_VALUE = MIN_VALUE + MAX_MOVE_NUM / 2;
 const int MAX_WIN_VALUE = MAX_VALUE - MAX_MOVE_NUM / 2;
 const int MIN_BAN_VALUE = MIN_VALUE + MAX_MOVE_NUM;
@@ -441,7 +441,7 @@ const int SAFE_MIN_VALUE = MIN_VALUE / 2;
 const int SAFE_MAX_VALUE = MAX_VALUE / 2;
 const int SORT_MAX_VALUE = 65536;
 const int DRAW_VALUE = 20;
-const int MAX_QUIESC_DISTANCE = 32;
+const int MAX_QUIESC_DISTANCE = 64;
 const int NULL_DEPTH = 2;
 
 void stringSplit(string str,const char split,vector<string>& splitStr){

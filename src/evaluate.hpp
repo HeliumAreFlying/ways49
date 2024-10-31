@@ -136,9 +136,9 @@ const int knightMidgame[256] = {
         0,  0,  0, 90,100, 99,103,104,103, 99,100, 90,  0,  0,  0,  0,
         0,  0,  0, 90, 98,101,102,103,102,101, 98, 90,  0,  0,  0,  0,
         0,  0,  0, 92, 94, 98, 95, 98, 95, 98, 94, 92,  0,  0,  0,  0,
-        0,  0,  0, 91, 92, 94, 95, 92, 95, 94, 92, 91,  0,  0,  0,  0,
+        0,  0,  0, 93, 92, 94, 95, 92, 95, 94, 92, 93,  0,  0,  0,  0,
         0,  0,  0, 85, 90, 92, 93, 78, 93, 92, 90, 85,  0,  0,  0,  0,
-        0,  0,  0, 88, 85, 89, 88, 90, 88, 89, 85, 88,  0,  0,  0,  0,
+        0,  0,  0, 88, 85, 90, 88, 90, 88, 90, 85, 88,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
@@ -173,12 +173,12 @@ const int rookMidgame[256] = {
         0,  0,  0,206,212,209,216,233,216,209,212,206,  0,  0,  0,  0,
         0,  0,  0,206,208,207,214,216,214,207,208,206,  0,  0,  0,  0,
         0,  0,  0,206,213,213,216,216,216,213,213,206,  0,  0,  0,  0,
-        0,  0,  0,204,211,211,214,215,214,211,211,204,  0,  0,  0,  0,
-        0,  0,  0,202,212,213,214,215,214,213,212,202,  0,  0,  0,  0,
-        0,  0,  0,200,208,204,210,214,210,204,208,200,  0,  0,  0,  0,
-        0,  0,  0,198,206,204,208,212,208,204,206,198,  0,  0,  0,  0,
-        0,  0,  0,200,203,204,206,198,206,204,203,200,  0,  0,  0,  0,
-        0,  0,  0,194,208,204,206,192,206,204,208,194,  0,  0,  0,  0,
+        0,  0,  0,208,211,211,214,215,214,211,211,208,  0,  0,  0,  0,
+        0,  0,  0,208,212,212,214,215,214,212,212,208,  0,  0,  0,  0,
+        0,  0,  0,204,209,204,212,214,212,204,209,204,  0,  0,  0,  0,
+        0,  0,  0,198,208,204,212,212,212,204,208,198,  0,  0,  0,  0,
+        0,  0,  0,200,208,206,212,200,212,206,208,200,  0,  0,  0,  0,
+        0,  0,  0,194,206,204,212,200,212,204,206,194,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
@@ -216,7 +216,7 @@ const int cannonMidgame[256] = {
         0,  0,  0, 96, 96, 96, 96,100, 96, 96, 96, 96,  0,  0,  0,  0,
         0,  0,  0, 95, 96, 99, 96,100, 96, 99, 96, 95,  0,  0,  0,  0,
         0,  0,  0, 96, 96, 96, 96, 96, 96, 96, 96, 96,  0,  0,  0,  0,
-        0,  0,  0, 97, 96,101, 99,102, 99,101, 96, 97,  0,  0,  0,  0,
+        0,  0,  0, 97, 96,100, 99,101, 99,100, 96, 97,  0,  0,  0,  0,
         0,  0,  0, 96, 97, 98, 98, 98, 98, 98, 97, 96,  0,  0,  0,  0,
         0,  0,  0, 96, 96, 97, 99, 99, 99, 97, 96, 96,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -313,7 +313,7 @@ static const int stringValueTab[512] = {
         0,  0,  0,  0,  0,  0,  0, 32,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0, 36,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0, 40,  0,  0,  0,  0,  0,  0,  0,  0,
-        12, 16, 20, 24, 28, 32, 36,  0, 36, 32, 28, 24, 20, 16, 12,  0,
+        12, 16, 20, 24, 28, 32, 36,  0, 36, 32, 28, 24, 20, 16, 12, 0,
         0,  0,  0,  0,  0,  0,  0, 40,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0, 36,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0, 32,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -420,7 +420,9 @@ public:
             }
         }
         //记录迷你置换表
-        miniHashCache[firstHashKey & 4095] = getNowDistance();
+        if(miniHashCache[firstHashKey & 4095] == 0){
+            miniHashCache[firstHashKey & 4095] = getNowDistance();
+        }
         //步进哈希键
         firstHashKeyRoad.push_back(firstHashKey);
         seconHashdKeyRoad.push_back(secondHashKey);
@@ -467,7 +469,9 @@ public:
         //步进棋盘
         position::unMakeMove(fromPos,toPos,fromPiece,toPiece);
         //撤销迷你置换表
-        miniHashCache[firstHashKey & 4095] = 0;
+        if(miniHashCache[firstHashKey & 4095] == getNowDistance()){
+            miniHashCache[firstHashKey & 4095] = 0;
+        }
         //步进哈希键
         firstHashKey = firstHashKeyRoad.back();
         secondHashKey = seconHashdKeyRoad.back();
@@ -481,15 +485,6 @@ public:
         moveRoad.pop_back();
     }
     int getEvaluate(int side,int vlAlpha,int vlBeta){
-        // 检查将帅是否存在
-        const int sideKingPos = swapBoard.getPosByPiece((side == red) ? redKingPiece : blackKingPiece);
-        if(!sideKingPos){
-            return MIN_VALUE + getNowDistance();
-        }
-        const int reverseSideKingPos = swapBoard.getPosByPiece((side == red) ? blackKingPiece : redKingPiece);
-        if(!reverseSideKingPos){
-            return MAX_VALUE - getNowDistance();
-        }
         // 四级偷懒评价(彻底偷懒评价)，只包括子力平衡；
         int vl = this->material(side);
         if (vl + EVAL_MARGIN1 <= vlAlpha) {
@@ -550,7 +545,7 @@ protected:
         }
         int iRepLevel = 0;
         int oRepLevel = 0;
-        for(int i = (int)moveRoad.size() - 1,vSide = side;i >= 0;i--,vSide=-vSide){
+        for(int i = (int)moveRoad.size() - 1,vSide = side;i >= (int)moveRoad.size() - 7;i--,vSide=-vSide){
             const step& lastMove = moveRoad[i];
             if(lastMove.toPiece){
                 return none_rep;
@@ -563,9 +558,9 @@ protected:
             const int iCheck = checkMoveStatus[i];
             const int iChase = chaseMoveStatus[i];
             if(vSide == side){
-                iRepLevel += iCheck * 2 + iChase;
+                iRepLevel += (iCheck << 1) + iChase;
             }else{
-                oRepLevel += iCheck * 2 + iChase;
+                oRepLevel += (iCheck << 1) + iChase;
             }
 
             if(firstHashKeyRoad[i] == firstHashKey){
@@ -716,9 +711,9 @@ private:
     int knightTrap(int side){
         int vlRedKnightTrap = 0;
         int vlBlackKnightTrap = 0;
-        const int maxCnt = 5;
-        const int singleScore = 2;
-        const int maxScore = maxCnt * singleScore;
+        const int maxCnt = 2;
+        const int manyScores[2] = {5,5};
+        const int maxScore = 10;
         for(int piece : redKnightPieceList){
             const int pos = position::swapBoard.getPosByPiece(piece);
             int redPenalty = maxScore;
@@ -733,7 +728,7 @@ private:
                         inBoard[toPos] &&
                         piece * toPiece <= 0){
                         if(!genMove::getRelation(*this,toPos,piece,beThreatened)){
-                            redPenalty -= singleScore;
+                            redPenalty -= manyScores[cnt];
                             if(cnt > maxCnt){
                                 break;
                             }
@@ -758,7 +753,7 @@ private:
                         inBoard[toPos] &&
                         piece * toPiece <= 0){
                         if(!genMove::getRelation(*this,toPos,piece,beThreatened)){
-                            blackPenalty -= singleScore;
+                            blackPenalty -= manyScores[cnt];
                             if(cnt > maxCnt){
                                 break;
                             }

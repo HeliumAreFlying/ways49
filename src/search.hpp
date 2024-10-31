@@ -19,15 +19,16 @@ public:
     static void sortNormalMoveSeuqance(evaluate& e,historyCache& h,vector<step>& moveList){
         static int i,a = 0;
         for(step& move : moveList){
-            if(move.toPiece){
+            const int vlEat = getMvvLva(e,move);
+            if(vlEat >= 0){
                 move.sortType = justEatMove;
-                move.vl = getMvvLva(e,move);
+                move.vl = vlEat;
             }else{
                 move.sortType = historyMove;
                 move.vl = h.getCache(move);
             }
         }
-        sort(moveList.begin(),moveList.end(), vlAndTypeCompare);
+        sort(moveList.begin(),moveList.end(), vlCompare);
     }
     static void sortQuesicMoveSequance(evaluate& e,vector<step>& moveList){
         for(step& move : moveList){
@@ -48,13 +49,14 @@ public:
         swap(tempMoveList,moveList);
         for(step& move : moveList){
             move.sortType = nonFindPv;
-            if(move.toPiece){
-                move.vl = getMvvLva(e,move);
+            int vlEat = getMvvLva(e,move);
+            if(vlEat >= 0){
+                move.vl = vlEat;
             }
         }
         sort(moveList.begin(),moveList.end(), vlCompare);
     }
-    static void refreshRootMoveSequance(vector<step>& moveList,step& betterMove){
+    static void refreshRootMoveSequance(vector<step>& moveList,historyCache& h,step& betterMove){
         for(step& move : moveList){
             if(move == betterMove){
                 move.sortType = findPv;
@@ -85,7 +87,7 @@ private:
             if(mvv > lva){
                 return mvv - lva + 1;
             }
-            if(mvv == lva && lva >= 3){
+            if(mvv == lva && lva >= 4){
                 return 1;
             }
             if(inSideBoard[move.toPos] * move.toPiece < 0 && toType == pawn){
@@ -195,6 +197,8 @@ public:
                     if(searchQuesic(e,vlAlpha,vlAlpha + 1) > vlAlpha && searchQuesic(e,vlBeta - 1,vlBeta) < vlBeta){
                         return vl;
                     }
+                }else if(bCheck){
+                    newDepth --;
                 }
             }
         }
@@ -217,48 +221,14 @@ public:
                 if(vl > vlBest){
                     vlBest = vl;
                     if(vl >= vlBeta){
+                        pBestMove = &convert_move;
                         nodeType = beta;
                         quit = true;
                     }
                     if(vl > vlAlpha){
+                        pBestMove = &convert_move;
                         nodeType = pv;
                         vlAlpha = vl;
-                    }
-                }
-            }
-        }
-
-        //吃子搜索
-        if(!quit){
-            genMove::genMoveList(e,moveList,all);
-            moveSort::sortNormalMoveSeuqance(e,historyMap,moveList);
-            for(step & move : moveList){
-                if(move != convert_move && move.toPiece && move.vl >= 0){
-                    if(e.makeMove(move.fromPos,move.toPos)){
-                        if(vlBest == MIN_VALUE){
-                            vl = -searchPV(e, newDepth,-vlBeta,-vlAlpha);
-                        }else{
-                            vl = -searchNonPV(e,newDepth,-vlAlpha);
-                            if(vl > vlAlpha && vl < vlBeta){
-                                vl = -searchPV(e,newDepth,-vlBeta,-vlAlpha);
-                            }
-                        }
-                        e.unMakeMove();
-
-                        if(vl > vlBest){
-                            vlBest = vl;
-                            if(vl >= vlBeta){
-                                pBestMove = &move;
-                                nodeType = beta;
-                                quit = true;
-                                break;
-                            }
-                            if(vl > vlAlpha){
-                                pBestMove = &move;
-                                nodeType = pv;
-                                vlAlpha = vl;
-                            }
-                        }
                     }
                 }
             }
@@ -269,7 +239,7 @@ public:
         if(!quit){
             killerMap.getCache(e,killerMoveList);
             for(step & move : killerMoveList){
-                if(move != convert_move && (!move.toPiece || move.vl < 0)){
+                if(move != convert_move){
                     if(e.makeMove(move.fromPos,move.toPos)){
                         if(vlBest == MIN_VALUE){
                             vl = -searchPV(e, newDepth,-vlBeta,-vlAlpha);
@@ -285,10 +255,12 @@ public:
                             vlBest = vl;
                             if(vl >= vlBeta){
                                 quit = true;
+                                pBestMove = &move;
                                 nodeType = beta;
                                 break;
                             }
                             if(vl > vlAlpha){
+                                pBestMove = &move;
                                 vlAlpha = vl;
                                 nodeType = pv;
                             }
@@ -300,10 +272,11 @@ public:
 
         //剩余走法
         if(!quit){
+            genMove::genMoveList(e,moveList,all);
+            moveSort::sortNormalMoveSeuqance(e,historyMap,moveList);
             for(step & move : moveList){
                 if(!moveSort::inOtherStepList(move,killerMoveList) &&
-                    move != convert_move &&
-                    (!move.toPiece || move.vl < 0)){
+                    move != convert_move){
                     if(e.makeMove(move.fromPos,move.toPos)){
                         if(vlBest == MIN_VALUE){
                             vl = -searchPV(e, newDepth,-vlBeta,-vlAlpha);
@@ -320,6 +293,7 @@ public:
                             if(vl >= vlBeta){
                                 pBestMove = &move;
                                 nodeType = beta;
+                                quit = true;
                                 break;
                             }
                             if(vl > vlAlpha){
@@ -333,13 +307,14 @@ public:
             }
         }
 
-
         if(pBestMove){
             hashMap.recoardCache(e,nodeType,vlBest,depth,pBestMove);
             historyMap.recoardCache(*pBestMove,depth);
-            if(nodeType == beta){
+            if(nodeType != beta){
                 killerMap.recoardCache(e,*pBestMove);
             }
+        }else{
+            hashMap.recoardCache(e,alpha,vlBest,depth, nullptr);
         }
 
         if(vlBest == MIN_VALUE){
@@ -371,6 +346,8 @@ public:
                     return vl;
                 }else if(vl < vlBeta && svl < vlBeta){
                     return vl;
+                }else if(bCheck){
+                    newDepth --;
                 }
             }
         }
@@ -404,7 +381,31 @@ public:
                 if (vl > vlBest) {
                     vlBest = vl;
                     if (vl >= vlBeta) {
+                        pBestMove = &convert_move;
                         quit = true;
+                    }
+                }
+            }
+        }
+
+        //截断启发
+        vector<step> killerMoveList;
+        if(!quit){
+            killerMap.getCache(e,killerMoveList);
+            for(step & move : killerMoveList){
+                if(move != convert_move){
+                    if(e.makeMove(move.fromPos,move.toPos)){
+                        vl = -searchNonPV(e,newDepth,-vlBeta + 1);
+                        e.unMakeMove();
+
+                        if(vl > vlBest){
+                            vlBest = vl;
+                            if(vl >= vlBeta){
+                                pBestMove = &move;
+                                quit = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -416,52 +417,8 @@ public:
             genMove::genMoveList(e,moveList,all);
             moveSort::sortNormalMoveSeuqance(e,historyMap,moveList);
             for(step & move : moveList){
-                if(move != convert_move && move.toPiece && move.vl >= 0){
-                    if(e.makeMove(move.fromPos,move.toPos)){
-                        vl = -searchNonPV(e,newDepth,-vlBeta + 1);
-                        e.unMakeMove();
-
-                        if(vl > vlBest){
-                            vlBest = vl;
-                            if(vl >= vlBeta){
-                                pBestMove = &move;
-                                quit = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //截断启发
-        vector<step> killerMoveList;
-        if(!quit){
-            killerMap.getCache(e,killerMoveList);
-            for(step & move : killerMoveList){
-                if(move != convert_move && (!move.toPiece || move.vl < 0)){
-                    if(e.makeMove(move.fromPos,move.toPos)){
-                        vl = -searchNonPV(e,newDepth,-vlBeta + 1);
-                        e.unMakeMove();
-
-                        if(vl > vlBest){
-                            vlBest = vl;
-                            if(vl >= vlBeta){
-                                quit = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //剩余走法
-        if(!quit){
-            for(step & move : moveList){
                 if(!moveSort::inOtherStepList(move,killerMoveList) &&
-                    move != convert_move &&
-                    (!move.toPiece || move.vl < 0)){
+                    move != convert_move){
                     if(e.makeMove(move.fromPos,move.toPos)){
                         vl = -searchNonPV(e,newDepth,-vlBeta + 1);
                         e.unMakeMove();
@@ -470,6 +427,7 @@ public:
                             vlBest = vl;
                             if(vl >= vlBeta){
                                 pBestMove = &move;
+                                quit = true;
                                 break;
                             }
                         }
@@ -483,7 +441,7 @@ public:
             historyMap.recoardCache(*pBestMove,depth);
             killerMap.recoardCache(e,*pBestMove);
         }else{
-            hashMap.recoardCache(e,beta,vlBest,depth, nullptr);
+            hashMap.recoardCache(e,alpha,vlBest,depth, nullptr);
         }
 
         if(vlBest == MIN_VALUE){
@@ -511,7 +469,7 @@ public:
 
                 if(vl > vlBest){
                     move.vl = vl;
-                    moveSort::refreshRootMoveSequance(rootMoveList,move);
+                    moveSort::refreshRootMoveSequance(rootMoveList,historyMap,move);
                     vlBest = vl;
                 }
             }
@@ -519,7 +477,7 @@ public:
 
         if(!rootMoveList.empty()){
             step& bestMove = rootMoveList.front();
-            hashMap.recoardCache(e,beta,vlBest,maxDepth,&bestMove);
+            hashMap.recoardCache(e,pv,vlBest,maxDepth,&bestMove);
             historyMap.recoardCache(bestMove,maxDepth);
             bestMove.printMove();
         }
@@ -540,7 +498,7 @@ public:
             }
             clock_t now = clock();
             cout<<"depth = "<<depth<<" | vl = "<<vl<<" | time_sum =  "<<setprecision(3)<<(double)(now - start) / CLOCKS_PER_SEC<<"s"<<endl;
-            if(now - start >= maxTime / 2){
+            if(now - start >= maxTime / 3){
                 break;
             }
         }
@@ -572,14 +530,12 @@ private:
 
         //重复走法路线裁剪
         const int repType = e.isRep();
-        if(repType != none_rep){
-            if(repType == draw_rep){
-                return e.getDrawValue();
-            }else if(repType == kill_rep){
-                return MAX_BAN_VALUE - nDistance;
-            }else if(repType == killed_rep){
-                return MIN_BAN_VALUE + nDistance;
-            }
+        if(repType == draw_rep){
+            return e.getDrawValue();
+        }else if(repType == kill_rep){
+            return MAX_BAN_VALUE - nDistance;
+        }else if(repType == killed_rep){
+            return MIN_BAN_VALUE + nDistance;
         }
         return MIN_VALUE;
     }
