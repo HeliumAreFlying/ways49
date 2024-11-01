@@ -1,5 +1,6 @@
 import copy
 import json
+import random
 
 import numpy as np
 import os
@@ -137,20 +138,46 @@ def convert_to_256_data(filepaths):
 
 def convert_data(filepaths,start_id,end_id,debug=False):
     cnt = 0
+    parent_path = f"..\\dump\\{start_id}"
+    if not os.path.exists(parent_path):
+        os.mkdir(parent_path)
     for i,path in enumerate(filepaths):
         with open(path,"r",encoding="utf-8") as f:
             lines = f.readlines()
+            #
             game_board = copy.deepcopy(init_game_board)
             y_mirror_game_board = copy.deepcopy(init_game_board)
             flop_180_game_board = -flip180(game_board)
             y_mirror_flop_180_game_board = copy.deepcopy(flop_180_game_board)
+            #
             side = red
             y_mirror_side = red
             flop_180_side = black
             y_mirror_flop_180_side = black
+            #
+            win_side = None
+            y_mirror_win_side = None
+            flop_180_win_side = None
+            y_mirror_flop_180_win_side = None
             for line in lines:
                 line = line.strip()
+
+                if "<RecordResult>" in line:
+                    line = line.replace("<RecordResult>","")
+                    line = line.replace("</RecordResult>","")
+                    label = int(line)
+                    if label == 0 or label == 3:
+                        win_side = y_mirror_win_side = 0
+                    elif label == 1:
+                        win_side = y_mirror_win_side = copy.deepcopy(red)
+                    elif label == 2:
+                        win_side = y_mirror_win_side = copy.deepcopy(black)
+                    else:
+                        raise Exception(f'unknown win data which is {line}')
+                    flop_180_win_side = y_mirror_flop_180_win_side = -win_side
+
                 if "<Move value=" in line:
+                    assert (win_side is not None)
                     line = line.replace("<Move value=\"","")
                     line = line.replace("\" />","")
                     line = line.replace("-","")
@@ -167,7 +194,8 @@ def convert_data(filepaths,start_id,end_id,debug=False):
                             "board" : game_board.tolist(),
                             "move_str" : move_str,
                             "move_id" : move_id,
-                            "now_go_side" : side
+                            "now_go_side" : side,
+                            "win_side" : win_side
                         })
 
                         y_mirror_x1 = int(line[1])
@@ -180,7 +208,8 @@ def convert_data(filepaths,start_id,end_id,debug=False):
                             "board": y_mirror_game_board.tolist(),
                             "move_str": y_mirror_move_str,
                             "move_id": y_mirror_move_id,
-                            "now_go_side": y_mirror_side
+                            "now_go_side": y_mirror_side,
+                            "win_side": y_mirror_win_side
                         })
 
                         flop_180_x1 = 9 - int(line[1])
@@ -193,7 +222,8 @@ def convert_data(filepaths,start_id,end_id,debug=False):
                             "board": flop_180_game_board.tolist(),
                             "move_str": flop_180_move_str,
                             "move_id": flop_180_move_id,
-                            "now_go_side": flop_180_side
+                            "now_go_side": flop_180_side,
+                            "win_side": flop_180_win_side
                         })
 
                         y_mirror_flop_180_x1 = 9 - int(line[1])
@@ -206,7 +236,8 @@ def convert_data(filepaths,start_id,end_id,debug=False):
                             "board": y_mirror_flop_180_game_board.tolist(),
                             "move_str": y_mirror_flop_180_move_str,
                             "move_id": y_mirror_flop_180_move_id,
-                            "now_go_side": y_mirror_flop_180_side
+                            "now_go_side": y_mirror_flop_180_side,
+                            "win_side" : y_mirror_flop_180_win_side
                         })
 
                         make_move(game_board, x1, y1, x2, y2)
@@ -234,7 +265,7 @@ def convert_data(filepaths,start_id,end_id,debug=False):
                             print()
                             print()
                         cnt += 1
-                        with open(f"E:\\Projects_chess\\dump\\{start_id}_{cnt + 1}.json","w+",encoding="utf-8") as f:
+                        with open(os.path.join(parent_path,f"{cnt + 1}.json"),"w+",encoding="utf-8") as f:
                             json.dump(data,f)
     print(f"{start_id} -> {end_id} done")
 
@@ -251,9 +282,8 @@ def parallel_convert_data(filepaths):
     pool.join()
 
 if __name__ == "__main__":
-    #filepaths = get_filepaths("E:\\Projects_chess\\imsa-cbf")
-    #parallel_convert_data(filepaths)
-
-    filepaths = [os.path.join("E:\\Projects_chess\\imsa-cbf","2013年广东东莞凤岗镇象棋公开赛 {EF70C879-A151-4B84-864A-38BB991418AE}.cbf")]
-    convert_to_256_data(filepaths)
+    filepaths = get_filepaths("D:\\Files\\备份\\data_chinese_chess\\data\\imsa-cbf")
+    #random.shuffle(filepaths)
+    #convert_data(filepaths,0,0,True)
+    parallel_convert_data(filepaths)
 
