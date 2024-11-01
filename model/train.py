@@ -59,14 +59,14 @@ def train(converted_data_path):
     random.seed(6666)
     random.shuffle(train_filepaths)
     random.shuffle(test_filepaths)
-    batch_size = 128
+    batch_size = 32
     #
     train_batch_sum = len(train_filepaths) // batch_size
     test_batch_sum = len(test_filepaths) // batch_size
     #
     model = nnue().to(device)
     loss_method = nn.CrossEntropyLoss().to(device)
-    opt = torch.optim.RAdam(model.parameters(),lr=2e-4)
+    opt = torch.optim.RAdam(model.parameters(),lr=3e-4)
     for epoch in range(10000):
         train_loss = 0
         train_acc = 0
@@ -78,7 +78,6 @@ def train(converted_data_path):
             #
             y = model(train_input_list)
             train_acc += (y.argmax(1) == train_output_list).sum() / len(train_output_list)
-            y = torch.softmax(y,dim=1)
             loss = loss_method(y,train_output_list)
             train_loss += loss.item()
             opt.zero_grad()
@@ -97,17 +96,18 @@ def train(converted_data_path):
             test_epoch_filepaths = test_filepaths[start:end]
             test_input_list,test_output_list = convert_data_to_tensor(test_epoch_filepaths)
             y = model(test_input_list)
+            loss = loss_method(y, test_output_list)
             test_acc += (y.argmax(1) == test_output_list).sum() / len(test_output_list)
+            #
             y = torch.softmax(y,dim=1)
             test_entire_output_list.extend(test_output_list.tolist())
             test_entire_predict_list.extend(y.cpu().detach().tolist())
-            loss = loss_method(y, test_output_list)
             test_loss += loss.item()
             if test_batch % 100 == 0:
                 print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {test_loss / (test_batch + 1)} | test_acc {test_acc / (test_batch + 1)}")
         test_auc = roc_auc_score(y_true=test_entire_output_list,y_score=test_entire_predict_list,multi_class='ovo')
         print(f"epoch {epoch} | test auc {test_auc}")
-        torch.save(model.state_dict(),f"./save/model_with_tuc_{round(test_auc,3)}")
+        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_tuc_{round(test_auc,4)}")
 
 if __name__ == "__main__":
     train(converted_data_path="../dump")

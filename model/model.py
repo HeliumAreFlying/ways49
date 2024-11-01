@@ -9,7 +9,8 @@ class nnue(nn.Module):
         super().__init__()
         self.fc_1 = nn.Linear(input_size,128)
         self.fc_2 = nn.Linear(128,32)
-        self.fc_3 = nn.Linear(32,3)
+        self.fc_3 = nn.Linear(32, 32)
+        self.fc_4 = nn.Linear(32, 3)
         self.relu = nn.ReLU()
     def forward(self,x):
         y = self.fc_1(x)
@@ -17,6 +18,8 @@ class nnue(nn.Module):
         y = self.fc_2(y)
         y = self.relu(y)
         y = self.fc_3(y)
+        y = self.relu(y)
+        y = self.fc_4(y)
         return y
 
 if __name__ == "__main__":
