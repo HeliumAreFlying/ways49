@@ -85,10 +85,12 @@ def train(converted_data_path):
             loss.backward()
             opt.step()
             #
-            if train_batch % 50 == 0:
+            if train_batch % 100 == 0:
                 print(f"epoch {epoch} | batch {train_batch} : {train_batch_sum} | train_loss {train_loss / (train_batch + 1)} | train_acc {train_acc / (train_batch + 1)}")
         test_loss = 0
         test_acc = 0
+        test_entire_output_list = []
+        test_entire_predict_list = []
         for test_batch in range(test_batch_sum):
             start = batch_size * test_batch
             end = min(batch_size * (test_batch + 1),len(test_filepaths))
@@ -97,11 +99,15 @@ def train(converted_data_path):
             y = model(test_input_list)
             test_acc += (y.argmax(1) == test_output_list).sum() / len(test_output_list)
             y = torch.softmax(y,dim=1)
+            test_entire_output_list.extend(test_output_list.tolist())
+            test_entire_predict_list.extend(y.cpu().detach().tolist())
             loss = loss_method(y, test_output_list)
             test_loss += loss.item()
-            if test_batch % 50 == 0:
-                print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {train_loss / (test_batch + 1)} | train_acc {test_acc / (test_batch + 1)}")
-        torch.save(model.state_dict(),f"./save/model_with_tcc_{round(test_acc / test_batch_sum,3)}")
+            if test_batch % 100 == 0:
+                print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {test_loss / (test_batch + 1)} | test_acc {test_acc / (test_batch + 1)}")
+        test_auc = roc_auc_score(y_true=test_entire_output_list,y_score=test_entire_predict_list,multi_class='ovo')
+        print(f"epoch {epoch} | test auc {test_auc}")
+        torch.save(model.state_dict(),f"./save/model_with_tuc_{round(test_auc,3)}")
 
 if __name__ == "__main__":
     train(converted_data_path="../dump")
