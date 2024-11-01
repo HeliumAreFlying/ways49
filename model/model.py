@@ -23,5 +23,5 @@ class nnue(nn.Module):
         return y
 
 if __name__ == "__main__":
-    model = nnue().to(device)
-    torchsummary.summary(model,input_size=(2,256 * 7 + 1),device=device)
+    model = nnue(input_size=90 * 7 + 1).to(device)
+    torchsummary.summary(model,input_size=(2,90 * 7 + 1),device=device)

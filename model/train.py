@@ -52,7 +52,7 @@ def convert_data_to_tensor(train_epoch_filepaths,to_tensor=True):
 
 def train(converted_data_path):
     filepaths = get_filepaths(converted_data_path)
-    split_spot = int(len(filepaths) * 0.95)
+    split_spot = int(len(filepaths) * 0.9)
     train_filepaths = filepaths[:split_spot]
     test_filepaths = filepaths[split_spot:]
     #
