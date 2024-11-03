@@ -110,10 +110,14 @@ def flip90_right(arr):
     new_arr = np.transpose(new_arr)[::-1]
     return new_arr
 
-def convert_to_256_data(filepaths):
+def convert_to_256_data(filepaths,start_id,end_id,debug=False):
+    parent_path = f"../dump/{start_id}_to_{end_id}"
+    if not os.path.exists(parent_path):
+        os.mkdir(parent_path)
     for i,path in enumerate(filepaths):
         with open(path,"r",encoding="utf-8") as f:
             lines = f.readlines()
+            com_moves = []
             for line in lines:
                 if "<Move value=" in line: #'  <Move value="44-64" end="1" />
                     if "00-00" not in line:
@@ -131,10 +135,26 @@ def convert_to_256_data(filepaths):
                         y2 = int(line[2]) + 3
                         from_pos = (x1 << 4) + y1
                         to_pos = (x2 << 4) + y2
-                        combinate_move = (to_pos << 8) + from_pos
-                        with open(f"E:\\Projects_chess\\dump_2\\{os.path.basename(path)}.txt", "a+", encoding="utf-8") as f:
-                            f.write(str(combinate_move) + "\n")
-                            print(combinate_move)
+                        com_move = (to_pos << 8) + from_pos
+                        com_moves.append(com_move)
+            with open(os.path.join(parent_path, f"{os.path.basename(path)}.txt"), "w+", encoding="utf-8") as f:
+                for com_move in com_moves:
+                    f.write(str(com_move) + "\n")
+                    if debug:
+                        print(com_move)
+
+def parallel_convert_to_256_data(filepaths):
+    job_sum = 1024
+    inv = len(filepaths) // job_sum
+
+    pool = mp.Pool(mp.cpu_count())
+    for i in range(job_sum):
+        start_index = i * inv
+        end_index = min((i + 1) * inv, len(filepaths) - 1)
+        #convert_to_256_data(filepaths[start_index:end_index], start_index, end_index, False)
+        pool.apply_async(convert_to_256_data, (filepaths[start_index:end_index], start_index, end_index,False))
+    pool.close()
+    pool.join()
 
 def convert_data(filepaths,start_id,end_id,debug=False):
     cnt = 0
@@ -285,5 +305,6 @@ if __name__ == "__main__":
     filepaths = get_filepaths("D:\\Files\\备份\\data_chinese_chess\\data\\imsa-cbf")
     #random.shuffle(filepaths)
     #convert_data(filepaths,0,0,True)
-    parallel_convert_data(filepaths)
+    #parallel_convert_data(filepaths)
+    parallel_convert_to_256_data(filepaths)
 
