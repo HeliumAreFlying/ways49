@@ -481,7 +481,7 @@ public:
             step& bestMove = rootMoveList.front();
             hashMap.recoardCache(e,pv,vlBest,maxDepth,&bestMove);
             historyMap.recoardCache(bestMove,maxDepth);
-            bestMove.printMove();
+            //bestMove.printMove();
         }
         return vlBest;
     }
@@ -495,7 +495,7 @@ public:
         for(int depth = 1;depth <= maxDepth;depth++){
             vl = searchRoot(e,depth);
             clock_t now = clock();
-            cout<<"depth = "<<depth<<" | vl = "<<vl<<" | time_sum =  "<<setprecision(3)<<(double)(now - start) / CLOCKS_PER_SEC<<"s"<<endl;
+            //cout<<"depth = "<<depth<<" | vl = "<<vl<<" | time_sum =  "<<setprecision(3)<<(double)(now - start) / CLOCKS_PER_SEC<<"s"<<endl;
             if(now - start >= maxTime / 3){
                 break;
             }

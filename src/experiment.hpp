@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
+#include <omp.h>
 
 
 class test{
@@ -159,11 +160,15 @@ public:
         cout<<filePaths.size()<<endl;
 
         int pnt = 0;
+//#pragma omp parallel for
         for(const string& path : filePaths) {
-            pnt++;
-//            if(pnt <= 81){
-//                continue;
-//            }
+//#pragma omp critical
+            {
+                pnt++;
+            }
+            if(pnt <= 9848 || pnt >= 10000){
+                continue;
+            }
 
             evaluate e = evaluate(initGameBoard,red);
             searchGroup s = searchGroup();
@@ -178,12 +183,12 @@ public:
                 if(cnt >= 80){
                     break;
                 }
-                cout<<cnt<<endl;
+                //cout<<cnt<<endl;
                 try{
                     const int mv = atoi(moveStr.c_str());
-                    cout<<"----------------------------------------------"<<endl;
+                    //cout<<"----------------------------------------------"<<endl;
                     const int ev = s.searchMain(e,4,1000);
-                    cout<<"----------------------------------------------"<<endl;
+                    //cout<<"----------------------------------------------"<<endl;
                     string ev_str = to_string(ev);
                     string dump_str = moveStr + " " + ev_str;
                     cout<<dump_str<<endl;
