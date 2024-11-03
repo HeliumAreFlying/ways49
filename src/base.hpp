@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fstream>
 #include <io.h>
+#include <vector>
 using namespace std;
 
 //初始的游戏棋盘
@@ -453,24 +454,27 @@ void stringSplit(string str,const char split,vector<string>& splitStr){
     }
 }
 
-void getFiles(string path, vector<string>& files){
-    intptr_t hFile = 0;
-    struct _finddata_t fileinfo{};
+void getAllFiles(string path, vector<string>& files)
+{
+    intptr_t   hFile = 0;//文件句柄，过会儿用来查找
+    struct _finddata_t fileinfo;//文件信息
     string p;
     if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(), &fileinfo)) != -1)
+        //如果查找到第一个文件
     {
         do
         {
-            if ((fileinfo.attrib &  _A_SUBDIR))
+            if ((fileinfo.attrib &  _A_SUBDIR))//如果是文件夹
             {
                 if (strcmp(fileinfo.name, ".") != 0 && strcmp(fileinfo.name, "..") != 0)
-                    getFiles(p.assign(path).append("\\").append(fileinfo.name), files);
+                    getAllFiles(p.assign(path).append("\\").append(fileinfo.name), files);
             }
-            else
+            else//如果是文件
             {
                 files.push_back(p.assign(path).append("\\").append(fileinfo.name));
             }
-        } while (_findnext(hFile, &fileinfo) == 0);
-        _findclose(hFile);
+        } while (_findnext(hFile, &fileinfo) == 0);	//能寻找到其他文件
+
+        _findclose(hFile);	//结束查找，关闭句柄
     }
 }

@@ -4,6 +4,7 @@
 #include <random>
 #include <cstdlib>
 #include <ctime>
+#include <stdexcept>
 
 
 class test{
@@ -40,7 +41,7 @@ public:
     static void testRecoardMove(){
         string rootPath = "E:\\Projects_chess\\dump_2";
         vector<string> filePaths;
-        getFiles(rootPath,filePaths);
+        getAllFiles(rootPath,filePaths);
         cout<<filePaths.size()<<endl;
         for(const string& path : filePaths){
             evaluate e = evaluate(initGameBoard,red);
@@ -119,7 +120,7 @@ public:
     static void testEvaluate(){
         string rootPath = "E:\\Projects_chess\\dump_3";
         vector<string> filePaths;
-        getFiles(rootPath,filePaths);
+        getAllFiles(rootPath,filePaths);
         cout<<filePaths.size()<<endl;
 
         int i,a = 0;
@@ -151,6 +152,68 @@ public:
         }
     }
 
+    static void testDeepEvaluate(){
+        vector<string> filePaths;
+        filePaths.clear();
+        getAllFiles(R"(E:\Projects_chess\ways49\dump\0_to_0)",filePaths);
+        cout<<filePaths.size()<<endl;
+
+        int pnt = 0;
+        for(const string& path : filePaths) {
+            pnt++;
+//            if(pnt <= 81){
+//                continue;
+//            }
+
+            evaluate e = evaluate(initGameBoard,red);
+            searchGroup s = searchGroup();
+
+            ifstream in(path);
+            string moveStr;
+
+            vector<string> results;
+            int cnt = 0;
+            while (getline(in, moveStr)) {
+                cnt ++;
+                if(cnt >= 80){
+                    break;
+                }
+                cout<<cnt<<endl;
+                try{
+                    const int mv = atoi(moveStr.c_str());
+                    cout<<"----------------------------------------------"<<endl;
+                    const int ev = s.searchMain(e,4,1000);
+                    cout<<"----------------------------------------------"<<endl;
+                    string ev_str = to_string(ev);
+                    string dump_str = moveStr + " " + ev_str;
+                    cout<<dump_str<<endl;
+                    results.push_back(dump_str);
+                    if(abs(ev) >= 90){
+                        break;
+                    }
+                    if(!e.makeMove(mv & 255,mv >> 8)){
+                        break;
+                    }
+                }catch (const runtime_error& e){
+                    break;
+                }
+
+            }
+
+            in.close();
+
+            string recoardPath = "E:\\Projects_chess\\ways49\\dump_2\\" + to_string(pnt) + ".txt";
+            ofstream outputFile(recoardPath);
+            for(const string & result : results){
+                outputFile << result << endl;
+            }
+            outputFile.close();
+
+
+
+        }
+    }
+
     static void testSearch(){
         evaluate e = evaluate(initGameBoard,black);
         searchGroup s = searchGroup();
@@ -159,5 +222,7 @@ public:
         time_t end = clock();
         cout<<(double)(end - start) / CLOCKS_PER_SEC<<endl;
     }
+
+
 };
 

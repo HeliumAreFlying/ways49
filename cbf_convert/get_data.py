@@ -306,5 +306,6 @@ if __name__ == "__main__":
     #random.shuffle(filepaths)
     #convert_data(filepaths,0,0,True)
     #parallel_convert_data(filepaths)
-    parallel_convert_to_256_data(filepaths)
+    convert_to_256_data(filepaths,0,0,False)
+    #parallel_convert_to_256_data(filepaths)
 

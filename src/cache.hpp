@@ -84,7 +84,7 @@ protected:
 
 class hashCache{
 public:
-    explicit hashCache(uint64 n = 25){
+    explicit hashCache(uint64 n = 16){
         initCache(n);
     }
     ~hashCache(){
