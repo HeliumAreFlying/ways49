@@ -166,7 +166,7 @@ public:
             {
                 pnt++;
             }
-            if(pnt <= 9848 || pnt >= 10000){
+            if(pnt <= 37805 || pnt >= 40000){
                 continue;
             }
 

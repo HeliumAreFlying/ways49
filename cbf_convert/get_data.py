@@ -7,13 +7,13 @@ import os
 
 import multiprocessing as mp
 
-def get_filepaths(dir,extension="cbf"):
+def get_filepaths(directory,extension="cbf"):
     filepaths = []
-    for file in os.listdir(dir):
-        if file.endswith(extension):
-            filepaths.append(os.path.join(dir,file))
-        # if len(filepaths) > 8000:
-        #     break
+    for root,dirs,files in os.walk(directory):
+        for _file in files:
+            if _file.endswith(extension):
+                filepaths.append(os.path.join(root,_file))
+    print("size of filepaths = ",len(filepaths))
     return filepaths
 
 [K,A,B,N,R,C,P] = [1,2,3,4,5,6,7]
@@ -35,7 +35,26 @@ init_game_board = np.asarray([
     [0,0,0,R,N,B,A,K,A,B,N,R,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+])
+
+init_256_game_board = np.asarray([
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,r,n,b,a,k,a,b,n,r,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,c,0,0,0,0,0,c,0,0,0,0,0],
+    [0,0,0,p,0,p,0,p,0,p,0,p,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,P,0,P,0,P,0,P,0,P,0,0,0,0],
+    [0,0,0,0,C,0,0,0,0,0,C,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,R,N,B,A,K,A,B,N,R,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 ])
 
 #print(init_game_board.shape)
@@ -301,11 +320,82 @@ def parallel_convert_data(filepaths):
     pool.close()
     pool.join()
 
+def make_256_move(game_board,move):
+    from_pos = move & 255
+    to_pos = move >> 8
+    game_board[to_pos] = copy.deepcopy(game_board[from_pos])
+    game_board[from_pos] = 0
+
+def make_mirror_256_move(game_board,move):
+    from_pos = move & 255
+    to_pos = move >> 8
+    from_x = from_pos >> 4
+    from_y = from_pos & 15
+    mirror_from_y = 14 - from_y
+    mirror_from_pos = (from_x << 4) + mirror_from_y
+    to_x = to_pos >> 4
+    to_y = to_pos & 15
+    mirror_to_y = 14 - to_y
+    mirror_to_pos = (to_x << 4) + mirror_to_y
+    game_board[mirror_to_pos] = copy.deepcopy(game_board[mirror_from_pos])
+    game_board[mirror_from_pos] = 0
+
+def convert_file_to_data(para):
+    id, filepath = para
+    data = []
+    with open(filepath, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        game_board = copy.deepcopy(init_256_game_board)
+        mirror_game_board = copy.deepcopy(init_256_game_board)
+        game_board = game_board.reshape(256)
+        mirror_game_board = mirror_game_board.reshape(256)
+        side = copy.deepcopy(red)
+        for line in lines:
+            line = line.strip()
+            split_str = line.split(" ")
+
+            eva = int(split_str[1])
+
+            _dict = {
+                'board' : copy.deepcopy([int(i) for i in list(game_board)]),
+                'now_go_side' : side,
+                'eva' : eva,
+            }
+            mirror_dict = {
+                'board': copy.deepcopy([int(i) for i in list(mirror_game_board)]),
+                'now_go_side': side,
+                'eva': eva,
+            }
+            data.append(_dict)
+            data.append(mirror_dict)
+
+            # step
+            move = int(split_str[0])
+            make_256_move(game_board,move)
+            make_mirror_256_move(mirror_game_board,move)
+            side = -side
+    parent_path = f"../dump_3/{id}"
+    if not os.path.exists(parent_path):
+        os.mkdir(parent_path)
+    for d in data:
+        random_id = random.randint(1,1000000000000000000000)
+        with open(os.path.join(parent_path,f"{random_id}.json"),"w+",encoding="utf-8") as f:
+            json.dump(d,f)
+
+def convert_files_to_data(filepaths):
+    p = mp.Pool(mp.cpu_count())
+    paras = []
+    for id,filepath in enumerate(filepaths):
+        paras.append((id,filepath))
+    #convert_file_to_data(paras[0])
+    p.map(convert_file_to_data,paras)
+
 if __name__ == "__main__":
-    filepaths = get_filepaths("D:\\Files\\备份\\data_chinese_chess\\data\\imsa-cbf")
+    #filepaths = get_filepaths("D:\\Files\\备份\\data_chinese_chess\\data\\imsa-cbf")
     #random.shuffle(filepaths)
     #convert_data(filepaths,0,0,True)
     #parallel_convert_data(filepaths)
-    convert_to_256_data(filepaths,0,0,False)
+    #convert_to_256_data(filepaths,0,0,False)
     #parallel_convert_to_256_data(filepaths)
-
+    filepaths = get_filepaths("E:\\Projects_chess\\ways49\\dump_2","txt")
+    convert_files_to_data(filepaths)
