@@ -2,7 +2,7 @@ import json
 import torch
 import numpy as np
 import torch.nn as nn
-from model import nnue,device
+from model import nnue_classifier,device
 
 [K,A,B,N,R,C,P] = [1,2,3,4,5,6,7]
 [k,a,b,n,r,c,p] = [-1,-2,-3,-4,-5,-6,-7]
@@ -45,7 +45,7 @@ def convert_board_to_input(board,now_go_side,to_tensor=True):
     return input_data
 
 def predict(model_dict_path):
-    model = nnue().to(device)
+    model = nnue_classifier().to(device)
     model.load_state_dict(torch.load(model_dict_path))
     model.eval()
     input_data = convert_board_to_input(init_game_board,red)

@@ -390,6 +390,36 @@ def convert_files_to_data(filepaths):
     #convert_file_to_data(paras[0])
     p.map(convert_file_to_data,paras)
 
+def flop_data_180(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+            board = json_data['board']
+            np_board = np.array(board, dtype=int)
+            np_board = np_board.reshape(16, 16)
+            np_board = -np.flipud(np_board)
+            np_board = np_board.reshape(256)
+            _board = [int(i) for i in list(np_board)]
+            _now_go_side = -json_data['now_go_side']
+            _eva = -json_data['eva']
+            random_id = random.randint(1, 1000000000000000000000)
+            _dict = {
+                'board': _board,
+                'now_go_side': _now_go_side,
+                'eva': _eva
+            }
+            parent_path = f"E:\\Projects_chess\\ways49\\dump_3_mirror\\{random.randint(1,60000)}"
+            if not os.path.exists(parent_path):
+                os.mkdir(parent_path)
+            with open(os.path.join(parent_path, f"{random_id}.json"), "w+", encoding="utf-8") as f:
+                json.dump(_dict, f)
+    except:
+        pass
+
+def flop_datas_180(filepaths):
+    p = mp.Pool(mp.cpu_count())
+    p.map(flop_data_180, filepaths)
+
 if __name__ == "__main__":
     #filepaths = get_filepaths("D:\\Files\\备份\\data_chinese_chess\\data\\imsa-cbf")
     #random.shuffle(filepaths)
@@ -397,5 +427,6 @@ if __name__ == "__main__":
     #parallel_convert_data(filepaths)
     #convert_to_256_data(filepaths,0,0,False)
     #parallel_convert_to_256_data(filepaths)
-    filepaths = get_filepaths("E:\\Projects_chess\\ways49\\dump_2","txt")
-    convert_files_to_data(filepaths)
+    filepaths = get_filepaths("E:\\Projects_chess\\ways49\\dump_3","json")
+    #convert_files_to_data(filepaths)
+    flop_datas_180(filepaths)
