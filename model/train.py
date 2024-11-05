@@ -153,13 +153,13 @@ def train_regression(converted_data_path):
     random.seed(6666)
     random.shuffle(train_filepaths)
     random.shuffle(test_filepaths)
-    batch_size = 32
+    batch_size = 128
     #
     train_batch_sum = len(train_filepaths) // batch_size
     test_batch_sum = len(test_filepaths) // batch_size
     #
     model = nnue_regression().to(device)
-    loss_method = nn.L1Loss().to(device)
+    loss_method = nn.SmoothL1Loss().to(device)
     opt = torch.optim.RAdam(model.parameters(),lr=3e-4)
     for epoch in range(10000):
         train_loss = 0
@@ -189,7 +189,7 @@ def train_regression(converted_data_path):
             test_loss += loss.item()
             if test_batch % 100 == 0:
                 print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {test_loss / (test_batch + 1)}")
-        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_loss_{round(test_loss,4)}")
+        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_loss_{round(test_loss / (test_batch_sum + 1),4)}")
 
 if __name__ == "__main__":
     #train_classifier(converted_data_path="../dump")
