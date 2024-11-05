@@ -113,30 +113,26 @@ def convert_regression_data_to_tensor(train_epoch_filepaths,to_tensor=True):
     input_list = []
     output_list = []
     for path in train_epoch_filepaths:
-        json_data = json.load(open(path))
-        for single_data in json_data:
-            board = single_data['board']
-            now_go_side = single_data['now_go_side']
-            eva = single_data['eva']
-            #
-            input_data = np.zeros(shape=(256 * 7 + 1))
-            input_data[-1] = now_go_side  # 1 or -1
-            pos = 0
-            for line in board:
-                for piece in line:
-                    if piece != 0:
-                        convert_piece = abs(piece) - 1
-                        convert_pos = convert_piece * 256 + pos
-                        input_data[convert_pos] = 1 if piece > 0 else -1
-                    pos += 1
-
-            input_list.append(input_data)
-            #
-            output_data = eva / 90
-            output_data = min(output_data,1)
-            output_data = max(-1,output_data)
-            output_list.append(output_data)
-            #print(output_data)
+        single_data = json.load(open(path))
+        board = single_data['board']
+        now_go_side = single_data['now_go_side']
+        eva = single_data['eva']
+        #
+        input_data = np.zeros(shape=(256 * 7 + 1))
+        input_data[-1] = now_go_side  # 1 or -1
+        for pos in range(len(board)):
+            piece = board[pos]
+            if piece != 0:
+                convert_piece = abs(piece) - 1
+                convert_pos = convert_piece * 256 + pos
+                input_data[convert_pos] = 1 if piece > 0 else -1
+        input_list.append(input_data)
+        #
+        output_data = eva / 90
+        output_data = min(output_data, 1)
+        output_data = max(-1, output_data)
+        output_list.append(output_data)
+        # print(output_data)
     input_list = np.array(input_list,dtype=np.float32)
     output_list = np.array(output_list,dtype=np.float32)
     if to_tensor:
