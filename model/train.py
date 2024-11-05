@@ -153,7 +153,7 @@ def train_regression(converted_data_path):
     random.seed(6666)
     random.shuffle(train_filepaths)
     random.shuffle(test_filepaths)
-    batch_size = 128
+    batch_size = 512
     #
     train_batch_sum = len(train_filepaths) // batch_size
     test_batch_sum = len(test_filepaths) // batch_size
@@ -163,6 +163,7 @@ def train_regression(converted_data_path):
     opt = torch.optim.RAdam(model.parameters(),lr=3e-4)
     for epoch in range(10000):
         train_loss = 0
+        train_acc = 0
         for train_batch in range(train_batch_sum):
             start = batch_size * train_batch
             end = min(batch_size * (train_batch + 1),len(train_filepaths))
@@ -176,9 +177,12 @@ def train_regression(converted_data_path):
             loss.backward()
             opt.step()
             #
+            train_acc += np.average(np.abs(train_output_list.cpu().detach().numpy() - y.cpu().detach().numpy() ))
+            #
             if train_batch % 100 == 0:
-                print(f"epoch {epoch} | batch {train_batch} : {train_batch_sum} | train_loss {train_loss / (train_batch + 1)}")
+                print(f"epoch {epoch} | batch {train_batch} : {train_batch_sum} | train_loss {train_loss / (train_batch + 1)} | train acc {train_acc / (train_batch + 1)}")
         test_loss = 0
+        test_acc = 0
         for test_batch in range(test_batch_sum):
             start = batch_size * test_batch
             end = min(batch_size * (test_batch + 1),len(test_filepaths))
@@ -187,9 +191,11 @@ def train_regression(converted_data_path):
             y = model(test_input_list)
             loss = loss_method(test_output_list,y)
             test_loss += loss.item()
+            #
+            test_acc += np.average(np.abs(test_output_list.cpu().detach().numpy()  - y.cpu().detach().numpy() ))
             if test_batch % 100 == 0:
-                print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {test_loss / (test_batch + 1)}")
-        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_loss_{round(test_loss / (test_batch_sum + 1),4)}")
+                print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {test_loss / (test_batch + 1)} | test_acc {test_acc / (test_batch + 1)}")
+        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_acc_{round(test_acc / (test_batch_sum + 1),4)}")
 
 if __name__ == "__main__":
     #train_classifier(converted_data_path="../dump")
