@@ -120,8 +120,7 @@ def convert_regression_data_to_tensor(train_epoch_filepaths,to_tensor=True):
         #
         input_data = np.zeros(shape=(256 * 7 + 1))
         input_data[-1] = now_go_side  # 1 or -1
-        for pos in range(len(board)):
-            piece = board[pos]
+        for pos,piece in enumerate(board):
             if piece != 0:
                 convert_piece = abs(piece) - 1
                 convert_pos = convert_piece * 256 + pos
