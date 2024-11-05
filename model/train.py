@@ -113,7 +113,10 @@ def convert_regression_data_to_tensor(train_epoch_filepaths,to_tensor=True):
     input_list = []
     output_list = []
     for path in train_epoch_filepaths:
-        single_data = json.load(open(path))
+        try:
+            single_data = json.load(open(path))
+        except:
+            continue
         board = single_data['board']
         now_go_side = single_data['now_go_side']
         eva = single_data['eva']
@@ -130,7 +133,7 @@ def convert_regression_data_to_tensor(train_epoch_filepaths,to_tensor=True):
         output_data = eva / 90
         output_data = min(output_data, 1)
         output_data = max(-1, output_data)
-        output_list.append(output_data)
+        output_list.append([output_data])
         # print(output_data)
     input_list = np.array(input_list,dtype=np.float32)
     output_list = np.array(output_list,dtype=np.float32)
@@ -156,7 +159,7 @@ def train_regression(converted_data_path):
     test_batch_sum = len(test_filepaths) // batch_size
     #
     model = nnue_regression().to(device)
-    loss_method = nn.L1Loss.to(device)
+    loss_method = nn.L1Loss().to(device)
     opt = torch.optim.RAdam(model.parameters(),lr=3e-4)
     for epoch in range(10000):
         train_loss = 0
@@ -167,7 +170,7 @@ def train_regression(converted_data_path):
             train_input_list,train_output_list = convert_regression_data_to_tensor(train_epoch_filepaths)
             #
             y = model(train_input_list)
-            loss = loss_method(y,train_output_list)
+            loss = loss_method(train_output_list,y)
             train_loss += loss.item()
             opt.zero_grad()
             loss.backward()
@@ -182,11 +185,12 @@ def train_regression(converted_data_path):
             test_epoch_filepaths = test_filepaths[start:end]
             test_input_list,test_output_list = convert_regression_data_to_tensor(test_epoch_filepaths)
             y = model(test_input_list)
-            loss = loss_method(y, test_output_list)
+            loss = loss_method(test_output_list,y)
             test_loss += loss.item()
             if test_batch % 100 == 0:
                 print(f"epoch {epoch} | batch {test_batch} : {test_batch_sum} | test_loss {test_loss / (test_batch + 1)}")
-        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_tuc_{round(test_loss,4)}")
+        torch.save(model.state_dict(),f"./save/epoch_{epoch}_model_with_loss_{round(test_loss,4)}")
 
 if __name__ == "__main__":
-    train_classifier(converted_data_path="../dump")
+    #train_classifier(converted_data_path="../dump")
+    train_regression(converted_data_path="../dump_3")
