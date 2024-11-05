@@ -1333,4 +1333,5 @@ private:
     friend class hashCache;
     friend class moveSort;
     friend class pipe;
+    friend class nnue;
 };

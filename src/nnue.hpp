@@ -1,5 +1,6 @@
 #pragma once
 #include "position.hpp"
+#include "evaluate.hpp"
 #include <omp.h>
 #include <cmath>
 

@@ -32,5 +32,7 @@ add_executable(bit_src
         search.hpp
         cache.hpp
         pipe.hpp
+        nnue.hpp
+        nnue.hpp
 )
 

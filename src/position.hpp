@@ -330,6 +330,7 @@ private:
     friend class evaluate;
     friend class hashKey;
     friend class test;
+    friend class nnue;
 };
 
 //将士象马车炮兵
@@ -425,6 +426,7 @@ private:
     friend class hashKey;
     friend class moveSort;
     friend class searchGroup;
+    friend class nnue;
 };
 
 enum gameSide{
@@ -507,6 +509,7 @@ protected:
     friend class test;
     friend class hashKey;
     friend class searchGroup;
+    friend class nnue;
 };
 
 
