@@ -420,6 +420,15 @@ def flop_datas_180(filepaths):
     p = mp.Pool(mp.cpu_count())
     p.map(flop_data_180, filepaths)
 
+def clean_datas(filepaths):
+    for idx,path in enumerate(filepaths):
+        try:
+            with open(path,"r",encoding="utf-8") as f:
+                json.load(f)
+        except:
+            os.remove(path)
+        print(f"{idx+1}/{len(filepaths)}")
+
 if __name__ == "__main__":
     #filepaths = get_filepaths("D:\\Files\\备份\\data_chinese_chess\\data\\imsa-cbf")
     #random.shuffle(filepaths)

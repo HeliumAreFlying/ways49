@@ -146,6 +146,8 @@ def convert_regression_data_to_tensor(train_epoch_filepaths,to_tensor=True):
 
 def train_regression(converted_data_path):
     filepaths = get_filepaths(converted_data_path)
+    mirror_filepaths = get_filepaths(converted_data_path + "_mirror")
+    filepaths.extend(mirror_filepaths)
     split_spot = int(len(filepaths) * 0.9)
     train_filepaths = filepaths[:split_spot]
     test_filepaths = filepaths[split_spot:]
