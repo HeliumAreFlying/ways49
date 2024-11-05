@@ -159,7 +159,7 @@ def train_regression(converted_data_path):
     test_batch_sum = len(test_filepaths) // batch_size
     #
     model = nnue_regression().to(device)
-    loss_method = nn.SmoothL1Loss().to(device)
+    loss_method = nn.HuberLoss().to(device)
     opt = torch.optim.RAdam(model.parameters(),lr=3e-4)
     for epoch in range(10000):
         train_loss = 0
